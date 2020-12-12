@@ -1,5 +1,5 @@
 <html>
-  <body>
+  <body style="overflow: auto; margin: 0;">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/5.7.0/d3.min.js"></script>
 
   
@@ -8,39 +8,66 @@
 
 d3.csv("https://docs.google.com/spreadsheets/d/e/2PACX-1vT8O3Mk62YHM5jY3WF_5Bfc_L-_lWkbDINATSzr3uvF8WehERLMSshRNw32GB-9e-lM72EB0HeiWsiM/pub?gid=412777815&single=true&output=csv").then((data) =>{
 var config = {
-  "avatar_size": 50 //circle radius
+  "width": window.innerWidth,
+  "height":window.innerHeight,
+  "padding":100,
+  "maxRadiuc":28
 }
+
 
 let body = d3.select("body");
 
 let svg = body.append("svg")
-  .attr("width", 500)
-  .attr("height", 500);
+  .attr("width", config.width)
+  .attr("height", config.height);
 
 let defs = svg.append('svg:defs');
 
+let xScale = d3.scaleLinear()         
+            .domain([d3.min(data, d => d.X), -d3.min(data, d => d.X)]) 
+            .range([config.padding-config.maxRadiuc,config.width-config.padding-config.maxRadiuc]);
+let yScale = d3.scaleLinear()  
+            .domain([d3.max(data, d => d.Y), -d3.max(data, d => d.Y)]) 
+            .range([config.padding,config.height-config.padding]);
+let rScale = d3.scaleLinear()  
+            .domain([-d3.max(data, d => d.Radius), d3.max(data, d => d.Radius)]) 
+            .range([ 10,config.maxRadiuc]);
 
+// svg.append('rect')
+//     .attr('width', config.width)
+//     .attr('height', config.height)
+//     .attr('x', -height/2+185/2)
+//     .attr('y', -width/2+10)
+//     .attr('stroke', '#2378ae')
+//     .attr('stroke-width', '1')
 
+console.log( d3.max(data, d=> d.X)); 
+console.log( xScale(0) )
+//console.log("radius",rScale(d.Radius));
 
 data.forEach((d, i) => {
   defs.append("svg:pattern")
     .attr("id", "avatar" + i)
-    .attr("width", config.avatar_size*d.Radius)
-    .attr("height", config.avatar_size*d.Radius)
+    .attr("width", rScale(d.Radius)*2)
+    .attr("height", rScale(d.Radius)*2)
     .attr("patternUnits", "userSpaceOnUse")
     .append("svg:image")
     .attr("xlink:href", d.img)
-    .attr("width", config.avatar_size)
-    .attr("height", config.avatar_size)
+    .attr("width", rScale(d.Radius)*2)
+    .attr("height", rScale(d.Radius)*3)
     .attr("x", 0)
-    .attr("y", 0);
+    .attr("y", -rScale(d.Radius)/3.14);
+
+console.log(yScale(10)); 
 
   let circle = svg.append("circle")
-    .attr("transform", "translate(" + (250+d.X*10) + "," + (250-d.Y*10) + ")")
-    .attr("cx", config.avatar_size / 2)
-    .attr("cy", config.avatar_size / 2 - 2*d.Radius)
-    .attr("r", config.avatar_size / (-d.Radius+6))
-    .style("fill", "#fff")
+    .attr("transform", "translate(" + xScale(d.X) + "," + yScale(d.Y) + ")")
+    .attr("cx", rScale(d.Radius))
+    .attr("cy", rScale(d.Radius))
+    .attr("r", rScale(d.Radius)-2)
+    .attr("stroke", "#eee")
+    .attr("stroke-width", 2)
+    .style("fill", "#000")
     .style("fill", "url(#avatar" + i + ")");
 
 })})
