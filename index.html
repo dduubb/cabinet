@@ -10,8 +10,11 @@ d3.csv("https://docs.google.com/spreadsheets/d/e/2PACX-1vT8O3Mk62YHM5jY3WF_5Bfc_
 var config = {
   "width": window.innerWidth,
   "height":window.innerHeight,
-  "padding":100,
-  "maxRadiuc":28
+  "padding":0,
+  "maxRadiuc":28,
+  "tableauXscale": 18,
+  "tableauYscaleTop": 15.8,
+  "tableauYscaleDottom": -15.8
 }
 
 
@@ -24,11 +27,17 @@ let svg = body.append("svg")
 let defs = svg.append('svg:defs');
 
 let xScale = d3.scaleLinear()         
-            .domain([d3.min(data, d => d.X), -d3.min(data, d => d.X)]) 
+            .domain([-config.tableauXscale, config.tableauXscale]) 
             .range([config.padding-config.maxRadiuc,config.width-config.padding-config.maxRadiuc]);
 let yScale = d3.scaleLinear()  
-            .domain([d3.max(data, d => d.Y), -d3.max(data, d => d.Y)]) 
+            .domain([config.tableauYscaleTop, config.tableauYscaleDottom]) 
             .range([config.padding,config.height-config.padding]);
+// let xScale = d3.scaleLinear()         
+//             .domain([d3.min(data, d => d.X), -d3.min(data, d => d.X)]) 
+//             .range([config.padding-config.maxRadiuc,config.width-config.padding-config.maxRadiuc]);
+// let yScale = d3.scaleLinear()  
+//             .domain([d3.max(data, d => d.Y), -d3.max(data, d => d.Y)]) 
+//             .range([config.padding,config.height-config.padding]);
 let rScale = d3.scaleLinear()  
             .domain([-d3.max(data, d => d.Radius), d3.max(data, d => d.Radius)]) 
             .range([ 10,config.maxRadiuc]);
