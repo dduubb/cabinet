@@ -16,6 +16,7 @@ clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
   background-size: cover;
   background: no-repeat center center; 
 }
+
   </style>
 
   <script type="text/javascript">
@@ -30,10 +31,10 @@ clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
         "height": window.innerHeight,
         "padding": 0,
         "maxRadiuc": 0,
-        "tableauXscaleLeft": 0,
-         "tableauXscaleRight": 30,
-        "tableauYscaleTop": 14,
-        "tableauYscaleDottom": -7
+        "tableauXscaleLeft": 8,
+         "tableauXscaleRight": 19,
+        "tableauYscaleTop": 11,
+        "tableauYscaleDottom": 2
       }
 
 
@@ -64,7 +65,7 @@ clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
         .domain([-d3.max(data, d => d.Radius), d3.max(data, d => d.Radius)])
         .range([10, config.maxRadiuc]);
 
-let radius =(config.width / config.tableauXscaleRight-config.tableauXscaleLeft )-4;
+let radius =(config.width / config.tableauXscaleRight-config.tableauXscaleLeft );
 
         d3.select('svg')
             .selectAll('image')
