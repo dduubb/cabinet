@@ -1,0 +1,88 @@
+<html>
+
+<body style="overflow: auto; margin: 0;">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/5.7.0/d3.min.js"></script>
+
+
+  <script src="https://d3js.org/d3-hexbin.v0.2.min.js"></script>
+
+  <style>
+ image {
+	-webkit-clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+    -webkit-background-size: cover;
+  -moz-background-size: cover;
+  -o-background-size: cover;
+  background-size: cover;
+  background: no-repeat center center; 
+}
+  </style>
+
+  <script type="text/javascript">
+    var hexbin = d3.hexbin();
+
+
+    d3.csv(
+      "https://docs.google.com/spreadsheets/d/e/2PACX-1vT8O3Mk62YHM5jY3WF_5Bfc_L-_lWkbDINATSzr3uvF8WehERLMSshRNw32GB-9e-lM72EB0HeiWsiM/pub?gid=412777815&single=true&output=csv"
+      ).then((data) => {
+      var config = {
+        "width": window.innerWidth,
+        "height": window.innerHeight,
+        "padding": 0,
+        "maxRadiuc": 0,
+        "tableauXscaleLeft": 0,
+         "tableauXscaleRight": 30,
+        "tableauYscaleTop": 14,
+        "tableauYscaleDottom": -7
+      }
+
+
+
+      let body = d3.select("body");
+
+      let svg = body.append("svg")
+        .attr("width", config.width)
+        .attr("height", config.height);
+
+      let defs = svg.append('svg:defs');
+
+      let xScale = d3.scaleLinear()
+        .domain([config.tableauXscaleLeft, config.tableauXscaleRight])
+        .range([config.padding - config.maxRadiuc, config.width - config.padding - config.maxRadiuc]);
+      let yScale = d3.scaleLinear()
+        .domain([config.tableauYscaleDottom, config.tableauYscaleTop])
+        .range([config.padding, config.height - config.padding]);
+
+      // AUTO HEIGHT WIDTH
+    //   let xScale = d3.scaleLinear()         
+    //               .domain([d3.max(data, d => d.X), d3.min(data, d => d.X)]) 
+    //               .range([config.padding-config.maxRadiuc,config.width-config.padding-config.maxRadiuc]);
+    //   let yScale = d3.scaleLinear()  
+    //               .domain([d3.max(data, d => d.Y), d3.min(data, d => d.Y)]) 
+    //               .range([config.padding,config.height-config.padding]);
+      let rScale = d3.scaleLinear()
+        .domain([-d3.max(data, d => d.Radius), d3.max(data, d => d.Radius)])
+        .range([10, config.maxRadiuc]);
+
+let radius =(config.width / config.tableauXscaleRight-config.tableauXscaleLeft )-4;
+
+        d3.select('svg')
+            .selectAll('image')
+            .data( data )
+            .enter()
+            .append('image')
+            .attr('xlink:href', d => d.img)
+            .attr('x', d => xScale(d.HexX))
+            .attr('y', d => yScale(d.HexY))
+            .attr("width", radius*2) 
+            .attr("height", radius * 2.309401 )
+
+             
+             ;    
+
+      })
+    
+  </script>
+</body>
+
+</html>

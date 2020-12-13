@@ -1,86 +1,98 @@
 <html>
-  <body style="overflow: auto; margin: 0;">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/5.7.0/d3.min.js"></script>
 
-  
-<script type="text/javascript">
+<body style="overflow: auto; margin: 0;">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/5.7.0/d3.min.js"></script>
 
 
-d3.csv("https://docs.google.com/spreadsheets/d/e/2PACX-1vT8O3Mk62YHM5jY3WF_5Bfc_L-_lWkbDINATSzr3uvF8WehERLMSshRNw32GB-9e-lM72EB0HeiWsiM/pub?gid=412777815&single=true&output=csv").then((data) =>{
-var config = {
-  "width": window.innerWidth,
-  "height":window.innerHeight,
-  "padding":0,
-  "maxRadiuc":28,
-  "tableauXscale": 18,
-  "tableauYscaleTop": 15.8,
-  "tableauYscaleDottom": -15.8
-}
+  <script src="https://d3js.org/d3-hexbin.v0.2.min.js"></script>
+
+  <style>
+
+  </style>
+
+  <script type="text/javascript">
+    var hexbin = d3.hexbin();
 
 
-let body = d3.select("body");
+    d3.csv(
+      "https://docs.google.com/spreadsheets/d/e/2PACX-1vT8O3Mk62YHM5jY3WF_5Bfc_L-_lWkbDINATSzr3uvF8WehERLMSshRNw32GB-9e-lM72EB0HeiWsiM/pub?gid=412777815&single=true&output=csv"
+      ).then((data) => {
+      var config = {
+        "width": window.innerWidth,
+        "height": window.innerHeight,
+        "padding": 0,
+        "maxRadiuc": 28,
+        "tableauXscale": 18,
+        "tableauYscaleTop": 15.8,
+        "tableauYscaleDottom": -15.8
+      }
 
-let svg = body.append("svg")
-  .attr("width", config.width)
-  .attr("height", config.height);
 
-let defs = svg.append('svg:defs');
+      let body = d3.select("body");
 
-let xScale = d3.scaleLinear()         
-            .domain([-config.tableauXscale, config.tableauXscale]) 
-            .range([config.padding-config.maxRadiuc,config.width-config.padding-config.maxRadiuc]);
-let yScale = d3.scaleLinear()  
-            .domain([config.tableauYscaleTop, config.tableauYscaleDottom]) 
-            .range([config.padding,config.height-config.padding]);
-// let xScale = d3.scaleLinear()         
-//             .domain([d3.min(data, d => d.X), -d3.min(data, d => d.X)]) 
-//             .range([config.padding-config.maxRadiuc,config.width-config.padding-config.maxRadiuc]);
-// let yScale = d3.scaleLinear()  
-//             .domain([d3.max(data, d => d.Y), -d3.max(data, d => d.Y)]) 
-//             .range([config.padding,config.height-config.padding]);
-let rScale = d3.scaleLinear()  
-            .domain([-d3.max(data, d => d.Radius), d3.max(data, d => d.Radius)]) 
-            .range([ 10,config.maxRadiuc]);
+      let svg = body.append("svg")
+        .attr("width", config.width)
+        .attr("height", config.height);
 
-// svg.append('rect')
-//     .attr('width', config.width)
-//     .attr('height', config.height)
-//     .attr('x', -height/2+185/2)
-//     .attr('y', -width/2+10)
-//     .attr('stroke', '#2378ae')
-//     .attr('stroke-width', '1')
+      let defs = svg.append('svg:defs');
 
-console.log( d3.max(data, d=> d.X)); 
-console.log( xScale(0) )
-//console.log("radius",rScale(d.Radius));
+      let xScale = d3.scaleLinear()
+        .domain([-config.tableauXscale, config.tableauXscale])
+        .range([config.padding - config.maxRadiuc, config.width - config.padding - config.maxRadiuc]);
+      let yScale = d3.scaleLinear()
+        .domain([config.tableauYscaleTop, config.tableauYscaleDottom])
+        .range([config.padding, config.height - config.padding]);
 
-data.forEach((d, i) => {
-  defs.append("svg:pattern")
-    .attr("id", "avatar" + i)
-    .attr("width", rScale(d.Radius)*2)
-    .attr("height", rScale(d.Radius)*2)
-    .attr("patternUnits", "userSpaceOnUse")
-    .append("svg:image")
-    .attr("xlink:href", d.img)
-    .attr("width", rScale(d.Radius)*2)
-    .attr("height", rScale(d.Radius)*3)
-    .attr("x", 0)
-    .attr("y", -rScale(d.Radius)/3.14);
+      // AUTO HEIGHT WIDTH
+      // let xScale = d3.scaleLinear()         
+      //             .domain([d3.min(data, d => d.X), -d3.min(data, d => d.X)]) 
+      //             .range([config.padding-config.maxRadiuc,config.width-config.padding-config.maxRadiuc]);
+      // let yScale = d3.scaleLinear()  
+      //             .domain([d3.max(data, d => d.Y), -d3.max(data, d => d.Y)]) 
+      //             .range([config.padding,config.height-config.padding]);
+      let rScale = d3.scaleLinear()
+        .domain([-d3.max(data, d => d.Radius), d3.max(data, d => d.Radius)])
+        .range([10, config.maxRadiuc]);
 
-console.log(yScale(10)); 
 
-  let circle = svg.append("circle")
-    .attr("transform", "translate(" + xScale(d.X) + "," + yScale(d.Y) + ")")
-    .attr("cx", rScale(d.Radius))
-    .attr("cy", rScale(d.Radius))
-    .attr("r", rScale(d.Radius)-2)
-    .attr("stroke", "#ddd")
-    .attr("stroke-width", 2)
-    .style("fill", "#000")
-    .style("fill", "url(#avatar" + i + ")");
+      data.forEach((d, i) => {
+        defs.append("svg:pattern")
+          .attr("id", "avatar" + i)
+          .attr("class", "")
+          .attr("width", rScale(d.Radius) * 2)
+          .attr("height", rScale(d.Radius) * 2)
+          .attr("patternUnits", "userSpaceOnUse")
+          .append("svg:image")
+          .attr("xlink:href", d.img)
+          .attr("width", rScale(d.Radius) * 2)
+          .attr("height", rScale(d.Radius) * 3)
+          .attr("x", 0)
+          .attr("y", -rScale(d.Radius) / 3.14)
+          
 
-})})
+        console.log(yScale(10));
 
-</script>
+
+        let circle = svg.append("circle")
+        .attr("d", hexbin.hexagon())
+          .attr("transform", "translate(" + xScale(d.X) + "," + yScale(d.Y) + ")")
+          .attr("class", "")
+          
+          .attr("patternUnits", "userSpaceOnUse")
+          .attr("cx", rScale(d.Radius))
+          .attr("cy", rScale(d.Radius))
+          .attr("r", rScale(d.Radius) - 2)
+          .attr("stroke", "#ddd")
+          .attr("stroke-width", 2)
+          .style("fill", "#000")
+          .style("fill", "url(#avatar" + i + ")");
+
+
+        
+
+      })
+    })
+  </script>
 </body>
+
 </html>
