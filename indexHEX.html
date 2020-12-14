@@ -3,7 +3,6 @@
 <body id="page" style="overflow:hidden; margin: 0;">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/5.7.0/d3.min.js"></script>
 
-
   <script src="https://d3js.org/d3-hexbin.v0.2.min.js"></script>
 
   <style>
@@ -23,21 +22,17 @@
     console.log(urlLocale.searchParams.get("c")) ///.get("c"));
 
     let axisScale = {
-      padding: parseFloat( urlLocale.searchParams.get("p") )
+      padding: parseFloat(urlLocale.searchParams.get("p"))
     }
 
     d3.csv(
       "https://docs.google.com/spreadsheets/d/e/2PACX-1vT8O3Mk62YHM5jY3WF_5Bfc_L-_lWkbDINATSzr3uvF8WehERLMSshRNw32GB-9e-lM72EB0HeiWsiM/pub?gid=412777815&single=true&output=csv"
     ).then((data) => {
       let config = {
-        "width": window.innerWidth - (axisScale.padding ? axisScale.padding*2 :0),
-        "height": window.innerHeight - (axisScale.padding ? axisScale.padding*2 :0),
-        "padding": (axisScale.padding?axisScale.padding:0),
+        "width": window.innerWidth - (axisScale.padding ? axisScale.padding * 2 : 0),
+        "height": window.innerHeight - (axisScale.padding ? axisScale.padding * 2 : 0),
+        "padding": (axisScale.padding ? axisScale.padding : 0),
         "maxRadius": 0,
-        // "tableauXscaleLeft": axisScale.LX,
-        // "tableauXscaleRight": axisScale.RX ,
-        // "tableauYscaleTop": axisScale.TY,
-        // "tableauYscaleBottom": axisScale.BY,
         "tableauXscaleLeft": d3.min(data, d => parseFloat(d.HexX)),
         "tableauXscaleRight": d3.max(data, d => parseFloat(d.HexX) + 1),
         "tableauYscaleTop": d3.max(data, d => parseFloat(d.HexY)),
@@ -47,78 +42,45 @@
       let xSpan = (config.tableauXscaleRight - config.tableauXscaleLeft)
       let ySpan = (config.tableauYscaleTop - config.tableauYscaleBottom)
 
-      let possibleYgap = config.height / (ySpan + 2)
-      console.log("possYgap", possibleYgap);
-
       let renderWidth = config.width
-
       let radius = (renderWidth / (xSpan + 2))
       let yGap = radius * 1.15
-      console.log("yGap", yGap);
-      let autoHeight,yTop,topPadding = 0,leftPadding=0
+      let autoHeight, yTop, topPadding = 0,
+        leftPadding = 0
       if ((ySpan * (yGap + 1) * 2) < config.height) {
-console.log("running top");
-
         autoHeight = ySpan * (yGap + 1) * 2
-        yTop = autoHeight - 2* yGap
-        topPadding = (config.height  -autoHeight)/2
+        yTop = autoHeight - 2 * yGap
+        topPadding = (config.height - autoHeight) / 2
       } else {
         autoHeight = config.height
-        console.log("running bottom");
-        radius = (autoHeight / (2*1.1547005*(ySpan)))
-        config.width = radius * (ySpan*2)*.86 
-        yTop = autoHeight - 2*1.1547005 * radius
-        leftPadding = (window.innerWidth - config.width)/2 - config.padding
+        radius = (autoHeight / (2 * 1.1547005 * (ySpan)))
+        config.width = radius * (ySpan * 2) * .86
+        yTop = autoHeight - 2 * 1.1547005 * radius
+        leftPadding = (window.innerWidth - config.width) / 2 - config.padding
       }
 
-      //let autoHeight = ySpan * (yGap + 1) * 2
 
- //     let autoHeight = ((ySpan * (yGap + 1) * 2) < config.height) ?  ySpan * (yGap + 1) * 2 : config.height
-
-      console.log("radius", radius / 2);
-
-
-
-  document.getElementById("page").style.margin = `${config.padding + topPadding}px 0 0 ${config.padding + leftPadding}`;
+      document.getElementById("page").style.margin =
+        `${config.padding + topPadding}px 0 0 ${config.padding + leftPadding}`
 
       let body = d3.select("body");
 
       let svg = body.append("svg")
         .attr("width", config.width)
-        .attr("height", autoHeight);
-
-
+        .attr("height", autoHeight)
 
       let xScale = d3.scaleLinear()
         .domain([config.tableauXscaleLeft, config.tableauXscaleRight])
-        .range([0, config.width - radius]);
+        .range([0, config.width - radius])
       let yScale = d3.scaleLinear()
         .domain([config.tableauYscaleBottom, config.tableauYscaleTop])
-        .range([yTop, 0]);
+        .range([yTop, 0])
 
-      let defs = svg.append('svg:defs');
+      let defs = svg.append('svg:defs')
 
-
-      //     AUTO HEIGHT WIDTH
-      // let xScale = d3.scaleLinear()         
-      //             .domain([d3.max(data, d => d.X), d3.min(data, d => d.X)]) 
-      //             .range([config.tableauXscaleLeft, config.tableauXscaleRight]);
-      // let yScale = d3.scaleLinear()  
-      //             .domain([d3.max(data, d => d.Y), d3.min(data, d => d.Y)]) 
-      //             .range([autoHeight, 0]);
       let rScale = d3.scaleLinear()
         .domain([-d3.max(data, d => d.Radius), d3.max(data, d => d.Radius)])
         .range([10, config.maxRadius]);
-
-
-      // d3.select('svg')
-      // .append('rect')
-      //   .attr('x', xScale(0))
-      //   .attr('y', yScale(0))
-      //   .attr('width', xScale(config.width))
-      //   .attr('height', yScale(config.height))
-      //   .attr('stroke', 'black')
-      //   .attr('fill', '#ccc');
 
       d3.select('svg')
         .selectAll('image')
