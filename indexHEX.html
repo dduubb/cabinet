@@ -66,10 +66,9 @@ console.log("running top");
         autoHeight = config.height
         console.log("running bottom");
         radius = (autoHeight / (2*1.1547005*(ySpan)))
-        config.width = radius * (ySpan*2)*.86
+        config.width = radius * (ySpan*2)*.86 
         yTop = autoHeight - 2*1.1547005 * radius
-        leftPadding = (window.innerWidth - config.width)/2
-        console.log("padding stuff", window.innerHeight , config.width);
+        leftPadding = (window.innerWidth - config.width)/2 - config.padding
       }
 
       //let autoHeight = ySpan * (yGap + 1) * 2
