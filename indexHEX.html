@@ -6,7 +6,7 @@
   <script src="https://d3js.org/d3-hexbin.v0.2.min.js"></script>
 
   <style>
-    image {
+    image, rect {
       -webkit-clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
       clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
       -webkit-background-size: cover;
@@ -25,8 +25,11 @@
       padding: parseFloat(urlLocale.searchParams.get("p"))
     }
 
+    var URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vT8O3Mk62YHM5jY3WF_5Bfc_L-_lWkbDINATSzr3uvF8WehERLMSshRNw32GB-9e-lM72EB0HeiWsiM/pub?gid=412777815&single=true&output=csv"
+var URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRWQ6Tu7bFvRZnXRAReUb_SyBjclucR5of-jG9KCx9gN-NNmQdIKvb24i1he5oFS182XV_hSRU-bsut/pub?gid=0&single=true&output=csv"
+
     d3.csv(
-      "https://docs.google.com/spreadsheets/d/e/2PACX-1vT8O3Mk62YHM5jY3WF_5Bfc_L-_lWkbDINATSzr3uvF8WehERLMSshRNw32GB-9e-lM72EB0HeiWsiM/pub?gid=412777815&single=true&output=csv"
+      URL
     ).then((data) => {
       let config = {
         "width": window.innerWidth - (axisScale.padding ? axisScale.padding * 2 : 0),
@@ -76,17 +79,30 @@
         .domain([config.tableauYscaleBottom, config.tableauYscaleTop])
         .range([yTop, 0])
 
-      let defs = svg.append('svg:defs')
-
       let rScale = d3.scaleLinear()
         .domain([-d3.max(data, d => d.Radius), d3.max(data, d => d.Radius)])
         .range([10, config.maxRadius]);
 
-      d3.select('svg')
+      let groups = d3.select('svg')
         .selectAll('image')
         .data(data)
         .enter()
-        .append('image')
+        .append('g')
+
+
+        groups.append("rect")
+        .attr("x", d => xScale(d.HexX))
+        .attr("y", d => yScale(d.HexY))
+        .attr("width", radius * 2)
+        .attr("height", radius * 2.309401)
+     ///   .attr("fill", "url('http://cammac7.github.io/img/portfolio/LRO.jpg')");
+        
+        
+    //     .append('svg:image')
+    // .attr('xlink:href', 'http://cammac7.github.io/img/portfolio/LRO.jpg')
+
+
+        groups.append('image')
         .attr('xlink:href', d => d.img)
         .attr('x', d => xScale(d.HexX))
         .attr('y', d => yScale(d.HexY))
