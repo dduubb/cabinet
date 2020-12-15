@@ -6,14 +6,9 @@
   <script src="https://d3js.org/d3-hexbin.v0.2.min.js"></script>
 
   <style>
-    image, rect {
+    image,rect {
       -webkit-clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
       clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
-      -webkit-background-size: cover;
-      -moz-background-size: cover;
-      -o-background-size: cover;
-      background-size: cover;
-      background: no-repeat center center;
     }
   </style>
 
@@ -21,15 +16,18 @@
     let urlLocale = new URL(window.location.href)
     console.log(urlLocale.searchParams.get("c")) ///.get("c"));
 
+    const hexRatio = 1.1547005
     let axisScale = {
-      padding: parseFloat(urlLocale.searchParams.get("p"))
+      padding: parseFloat(urlLocale.searchParams.get("p")),
+      gap: parseFloat(urlLocale.searchParams.get("g")),
+      wide: (urlLocale.searchParams.get("wide"))
     }
 
-    var URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vT8O3Mk62YHM5jY3WF_5Bfc_L-_lWkbDINATSzr3uvF8WehERLMSshRNw32GB-9e-lM72EB0HeiWsiM/pub?gid=412777815&single=true&output=csv"
-var URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRWQ6Tu7bFvRZnXRAReUb_SyBjclucR5of-jG9KCx9gN-NNmQdIKvb24i1he5oFS182XV_hSRU-bsut/pub?gid=0&single=true&output=csv"
+var URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vT8O3Mk62YHM5jY3WF_5Bfc_L-_lWkbDINATSzr3uvF8WehERLMSshRNw32GB-9e-lM72EB0HeiWsiM/pub?gid=412777815&single=true&output=csv"
+var xURL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRWQ6Tu7bFvRZnXRAReUb_SyBjclucR5of-jG9KCx9gN-NNmQdIKvb24i1he5oFS182XV_hSRU-bsut/pub?gid=0&single=true&output=csv"
 
     d3.csv(
-      URL
+     ( axisScale.wide  ? URL :xURL )
     ).then((data) => {
       let config = {
         "width": window.innerWidth - (axisScale.padding ? axisScale.padding * 2 : 0),
@@ -44,21 +42,22 @@ var URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRWQ6Tu7bFvRZnXRAReUb
       }
       let xSpan = (config.tableauXscaleRight - config.tableauXscaleLeft)
       let ySpan = (config.tableauYscaleTop - config.tableauYscaleBottom)
-
+      let gap = (axisScale.gap ? axisScale.gap : 5)
       let renderWidth = config.width
-      let radius = (renderWidth / (xSpan + 2))
-      let yGap = radius * 1.15
+      let radius = (renderWidth / (xSpan + 1)) - gap
+      let yGap = radius * hexRatio
       let autoHeight, yTop, topPadding = 0,
         leftPadding = 0
-      if ((ySpan * (yGap + 1) * 2) < config.height) {
-        autoHeight = ySpan * (yGap + 1) * 2
+      if ((ySpan * (yGap ) * 2) < config.height) {
+        // bounded by width
+        autoHeight = ySpan * (yGap + 1 ) * 1.8 +  (gap * ySpan)        //(gap*4*hexRatio)<works on second
         yTop = autoHeight - 2 * yGap
         topPadding = (config.height - autoHeight) / 2
-      } else {
+      } else { // bounded by height
         autoHeight = config.height
-        radius = (autoHeight / (2 * 1.1547005 * (ySpan)))
-        config.width = radius * (ySpan * 2) * .86
-        yTop = autoHeight - 2 * 1.1547005 * radius
+        radius = (autoHeight / (2 * hexRatio * (ySpan))) -gap
+        config.width = radius * (ySpan) * 4 + (xSpan * gap)
+        yTop = autoHeight - 2 * hexRatio * radius
         leftPadding = (window.innerWidth - config.width) / 2 - config.padding
       }
 
@@ -79,9 +78,6 @@ var URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRWQ6Tu7bFvRZnXRAReUb
         .domain([config.tableauYscaleBottom, config.tableauYscaleTop])
         .range([yTop, 0])
 
-      let rScale = d3.scaleLinear()
-        .domain([-d3.max(data, d => d.Radius), d3.max(data, d => d.Radius)])
-        .range([10, config.maxRadius]);
 
       let groups = d3.select('svg')
         .selectAll('image')
@@ -89,25 +85,20 @@ var URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRWQ6Tu7bFvRZnXRAReUb
         .enter()
         .append('g')
 
-
-        groups.append("rect")
-        .attr("x", d => xScale(d.HexX))
-        .attr("y", d => yScale(d.HexY))
-        .attr("width", radius * 2)
-        .attr("height", radius * 2.309401)
-     ///   .attr("fill", "url('http://cammac7.github.io/img/portfolio/LRO.jpg')");
-        
-        
-    //     .append('svg:image')
-    // .attr('xlink:href', 'http://cammac7.github.io/img/portfolio/LRO.jpg')
-
+        groups.append("rect")    
+        .attr("x", d => xScale(d.HexX ))        
+        .attr("y", d => yScale(d.HexY ))         
+        .attr("width",  radius * 2)    
+        .attr("height", radius * 2 * hexRatio); 
 
         groups.append('image')
         .attr('xlink:href', d => d.img)
         .attr('x', d => xScale(d.HexX))
         .attr('y', d => yScale(d.HexY))
         .attr("width", radius * 2)
-        .attr("height", radius * 2.309401)
+        .attr("height", radius * 2 * hexRatio)
+
+  
 
 
 
