@@ -9,9 +9,20 @@
 
 <body id="page" style="overflow:hidden; margin: 0;position: absolute">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/5.7.0/d3.min.js"></script>
-
+  <style>
+  div.tooltip {	
+    position: absolute;			
+    text-align: left;			
+    width: 150px;					
+    padding: 4px;				
+    font: 16px sans-serif;		
+    background: rgb(212, 212, 212);	
+    border: 0px;		
+    pointer-events: none;			
+}</style>
   <script type="text/javascript">
 
+  
   /// done with hex fix
   //// to do add gap height working hex on the edge ? do I want to include gap in margin
   //// to do add gap width
@@ -21,10 +32,12 @@
     var axisScale = {
       padding: parseFloat(urlLocale.searchParams.get("p")),
       gap: parseFloat(urlLocale.searchParams.get("g")),
-      url: (urlLocale.searchParams.get("url"))
+      url: (urlLocale.searchParams.get("url")),
+      tooltip: (urlLocale.searchParams.get("tooltip")),
     }
 
     let urls = {
+      'random' : 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRWQ6Tu7bFvRZnXRAReUb_SyBjclucR5of-jG9KCx9gN-NNmQdIKvb24i1he5oFS182XV_hSRU-bsut/pub?gid=1840771184&single=true&output=csv',
       'doggy' : "https://docs.google.com/spreadsheets/d/e/2PACX-1vT8O3Mk62YHM5jY3WF_5Bfc_L-_lWkbDINATSzr3uvF8WehERLMSshRNw32GB-9e-lM72EB0HeiWsiM/pub?gid=736849411&single=true&output=csv",
       'narrow': "https://docs.google.com/spreadsheets/d/e/2PACX-1vT8O3Mk62YHM5jY3WF_5Bfc_L-_lWkbDINATSzr3uvF8WehERLMSshRNw32GB-9e-lM72EB0HeiWsiM/pub?gid=412777815&single=true&output=csv",
       'wide': "https://docs.google.com/spreadsheets/d/e/2PACX-1vRWQ6Tu7bFvRZnXRAReUb_SyBjclucR5of-jG9KCx9gN-NNmQdIKvb24i1he5oFS182XV_hSRU-bsut/pub?gid=0&single=true&output=csv",
@@ -84,8 +97,8 @@
 
       console.log(`TOP Padding calc is -> ${config.padding + topPadding}`);
       console.log(`LEFT Padding calc is -> ${config.padding + leftPadding}`);
-      // document.getElementById("page").style.margin =
-      //   `${config.padding + topPadding}px 0 0 ${config.padding + leftPadding}
+
+
 
       document.getElementById("page").style.top = `${config.padding + topPadding}px`
       document.getElementById("page").style.left = `${config.padding + leftPadding}px`
@@ -103,6 +116,12 @@
       let yScale = d3.scaleLinear()
         .domain([config.tableauYscaleBottom, config.tableauYscaleTop])
         .range([yTop, yBottom])
+
+        // Define the div for the tooltip
+var div = d3.select("body").append("div")	
+    .attr("class", "tooltip")
+    .attr("id","tooltip")				
+    .style("opacity", 0);
 
 
       let groups = d3.select('svg')
@@ -126,7 +145,28 @@
         .attr("width", itemWidth)
         .attr("height", itemHeight)
 
+
+
+        .on("mouseover", function(d) {		
+          if(axisScale.tooltip) {
+            div.transition()		
+                .duration(200)		
+                .style("opacity", .9);		
+            div	.html("<b>"  +d.Name + "</b><br/>"  + d.Position)	
+                .style("left", d3.select(this).attr("x") + "px")		
+                .style("top",  ((d3.select(this).attr("y")*1)+(d3.select(this).attr("height")*0.75))  + "px")
+                .style("width",  ((d3.select(this).attr("width"))-8)  + "px")
+                .style("min-height",  ((d3.select(this).attr("height")*0.25))  + "px")
+                console.log((gap));	
+            }})					
+        .on("mouseout", function(d) {		
+            div.transition()		
+                .duration(500)		
+                .style("opacity", 0);	
+        });
+
     })
+    
   </script>
 </body>
 
