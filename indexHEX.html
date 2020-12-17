@@ -1,33 +1,37 @@
-<html>
+<!doctype html>
+<html lang="en">
 
-<body id="page" style="overflow:hidden; margin: 0;">
+<head>
+  <meta charset="utf-8">
+  <title>Hex Diagram Background </title>
+  <meta name="author" content="dale wunderlich">
+</head>
+
+<body id="page" style="overflow:hidden; margin: 0;position: absolute">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/5.7.0/d3.min.js"></script>
 
-  <script src="https://d3js.org/d3-hexbin.v0.2.min.js"></script>
-
-  <style>
-    image,rect {
-      -webkit-clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
-      clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
-    }
-  </style>
-
   <script type="text/javascript">
-    let urlLocale = new URL(window.location.href)
-    console.log(urlLocale.searchParams.get("c")) ///.get("c"));
 
-    const hexRatio = 1.1547005
-    let axisScale = {
+  /// done with hex fix
+  //// to do add gap height working hex on the edge ? do I want to include gap in margin
+  //// to do add gap width
+    let urlLocale = new URL(window.location.href)
+
+    const hexRatio = (1 / ((Math.sqrt(3) / 2))) //  1.1547005
+    var axisScale = {
       padding: parseFloat(urlLocale.searchParams.get("p")),
       gap: parseFloat(urlLocale.searchParams.get("g")),
-      wide: (urlLocale.searchParams.get("wide"))
+      url: (urlLocale.searchParams.get("url"))
     }
 
-var URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vT8O3Mk62YHM5jY3WF_5Bfc_L-_lWkbDINATSzr3uvF8WehERLMSshRNw32GB-9e-lM72EB0HeiWsiM/pub?gid=412777815&single=true&output=csv"
-var xURL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRWQ6Tu7bFvRZnXRAReUb_SyBjclucR5of-jG9KCx9gN-NNmQdIKvb24i1he5oFS182XV_hSRU-bsut/pub?gid=0&single=true&output=csv"
+    let urls = {
+      'narrow': "https://docs.google.com/spreadsheets/d/e/2PACX-1vT8O3Mk62YHM5jY3WF_5Bfc_L-_lWkbDINATSzr3uvF8WehERLMSshRNw32GB-9e-lM72EB0HeiWsiM/pub?gid=412777815&single=true&output=csv",
+      'wide': "https://docs.google.com/spreadsheets/d/e/2PACX-1vRWQ6Tu7bFvRZnXRAReUb_SyBjclucR5of-jG9KCx9gN-NNmQdIKvb24i1he5oFS182XV_hSRU-bsut/pub?gid=0&single=true&output=csv",
+      'whole': "https://docs.google.com/spreadsheets/d/e/2PACX-1vT8O3Mk62YHM5jY3WF_5Bfc_L-_lWkbDINATSzr3uvF8WehERLMSshRNw32GB-9e-lM72EB0HeiWsiM/pub?gid=694371247&single=true&output=csv"
+    }
 
     d3.csv(
-     ( axisScale.wide  ? URL :xURL )
+      (urls[axisScale.url] ? urls[axisScale.url] : urls.wide)
     ).then((data) => {
       let config = {
         "width": window.innerWidth - (axisScale.padding ? axisScale.padding * 2 : 0),
@@ -43,40 +47,61 @@ var xURL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRWQ6Tu7bFvRZnXRAReU
       let xSpan = (config.tableauXscaleRight - config.tableauXscaleLeft)
       let ySpan = (config.tableauYscaleTop - config.tableauYscaleBottom)
       let gap = (axisScale.gap ? axisScale.gap : 5)
-      let renderWidth = config.width
-      let radius = (renderWidth / (xSpan + 1)) - gap
-      let yGap = radius * hexRatio
-      let autoHeight, yTop, topPadding = 0,
+      let autoHeight, yTop, yBottom, xRight, xLeft, topPadding = 0,
+        radius,
         leftPadding = 0
-      if ((ySpan * (yGap ) * 2) < config.height) {
+      let yGap = radius * hexRatio
+      let resultWiderThanWindow = (((xSpan + 1) / 2) / ((ySpan) * hexRatio) > (config.width / config.height));
+      console.log(resultWiderThanWindow);
+
+      // CONFIGURE THE SIZE
+      if (resultWiderThanWindow) {
         // bounded by width
-        autoHeight = ySpan * (yGap + 1 ) * 1.8 +  (gap * ySpan)        //(gap*4*hexRatio)<works on second
-        yTop = autoHeight - 2 * yGap
+        radius = (config.width / (xSpan + 1)) * 2    -(gap)              //width devided by num columns
+        itemHeight = radius * hexRatio  ////
+        xRight = 0
+        yTop = itemHeight * (ySpan - (ySpan / 4))  +  (.75 * ySpan * gap)  //works
+        xLeft = config.width - (radius / 2)              //account for half hex
+        autoHeight = ((.75 * ySpan + 1) * itemHeight) +  (.75 * ySpan * gap)           //
+        yBottom = gap
+        xRight = gap/2
         topPadding = (config.height - autoHeight) / 2
-      } else { // bounded by height
+        itemWidth = radius
+      } else {
+        console.log("bounded by height")
         autoHeight = config.height
-        radius = (autoHeight / (2 * hexRatio * (ySpan))) -gap
-        config.width = radius * (ySpan) * 4 + (xSpan * gap)
-        yTop = autoHeight - 2 * hexRatio * radius
+        radius = (autoHeight / (((ySpan + 1 - (ySpan / 4))) * hexRatio))  -gap //ok //height devided by num rows
+        config.width = radius * ((xSpan + 1) / 2)  +((xSpan)*gap*(1/hexRatio) )             //right 
+        xLeft = config.width - radius / 2                           //right
+        yTop = autoHeight - (radius * hexRatio) - (gap)
+        xRight = gap
+        yBottom = gap
         leftPadding = (window.innerWidth - config.width) / 2 - config.padding
+        itemWidth = radius
+        itemHeight = radius * hexRatio
       }
 
+      console.log(`TOP Padding calc is -> ${config.padding + topPadding}`);
+      console.log(`LEFT Padding calc is -> ${config.padding + leftPadding}`);
+      // document.getElementById("page").style.margin =
+      //   `${config.padding + topPadding}px 0 0 ${config.padding + leftPadding}
 
-      document.getElementById("page").style.margin =
-        `${config.padding + topPadding}px 0 0 ${config.padding + leftPadding}`
+      document.getElementById("page").style.top = `${config.padding + topPadding}px`
+      document.getElementById("page").style.left = `${config.padding + leftPadding}px`
 
       let body = d3.select("body");
 
       let svg = body.append("svg")
         .attr("width", config.width)
         .attr("height", autoHeight)
+        .attr("xmlns", "http://www.w3.org/2000/svg")
 
       let xScale = d3.scaleLinear()
         .domain([config.tableauXscaleLeft, config.tableauXscaleRight])
-        .range([0, config.width - radius])
+        .range([xRight, xLeft])
       let yScale = d3.scaleLinear()
         .domain([config.tableauYscaleBottom, config.tableauYscaleTop])
-        .range([yTop, 0])
+        .range([yTop, yBottom])
 
 
       let groups = d3.select('svg')
@@ -84,24 +109,21 @@ var xURL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRWQ6Tu7bFvRZnXRAReU
         .data(data)
         .enter()
         .append('g')
+        .attr("clip-path", "polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%")
 
-        groups.append("rect")    
-        .attr("x", d => xScale(d.HexX ))        
-        .attr("y", d => yScale(d.HexY ))         
-        .attr("width",  radius * 2)    
-        .attr("height", radius * 2 * hexRatio); 
+      groups.append("rect").attr("fill", "#00000011")
+        .attr("x", d => xScale(d.HexX))
+        .attr("y", d => yScale(d.HexY))
+        .attr("width", itemWidth)
+        .attr("height", itemHeight)
 
-        groups.append('image')
-        .attr('xlink:href', d => d.img)
+
+      groups.append('image')
+        .attr('href', d => d.img)
         .attr('x', d => xScale(d.HexX))
         .attr('y', d => yScale(d.HexY))
-        .attr("width", radius * 2)
-        .attr("height", radius * 2 * hexRatio)
-
-  
-
-
-
+        .attr("width", itemWidth)
+        .attr("height", itemHeight)
 
     })
   </script>
