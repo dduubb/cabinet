@@ -150,8 +150,8 @@ var div = d3.select("body").append("div")
         .attr('href', d => d.img)
         .attr('x', d => xScale(d.HexX))
         .attr('y', d => yScale(d.HexY))
-        .attr("width", itemWidth)
-        .attr("height", itemHeight)
+        .attr("width", d => (d.forceScale * itemWidth))
+        .attr("height", d => (d.forceScale * itemHeight))
 
 
 
