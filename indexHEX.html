@@ -142,8 +142,8 @@ var div = d3.select("body").append("div")
         
         .attr("x", d => xScale(d.HexX))
         .attr("y", d => yScale(d.HexY))
-        .attr("width", itemWidth)
-        .attr("height", itemHeight)
+        .attr("width", d => (d.forceScale * itemWidth)
+        .attr("height", d => (d.forceScale * itemHeight)
 
 
       groups.append('image')
