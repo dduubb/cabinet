@@ -10,6 +10,9 @@
 <body id="page" style="overflow:hidden; margin: 0;position: absolute">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/5.7.0/d3.min.js"></script>
   <style>
+    g#g1  {
+      /* transform: scale(1.5, 1.5) translate(-2px, -105px); */ */
+    }
   div.tooltip {	
     position: absolute;
     overflow-wrap: break-word;	
@@ -132,8 +135,11 @@ var div = d3.select("body").append("div")
         .enter()
         .append('g')
         .attr("clip-path", "polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%")
+        .attr("id", d => ("g"+d.index))
+
 
       groups.append("rect").attr("fill", "#000000cc")
+        
         .attr("x", d => xScale(d.HexX))
         .attr("y", d => yScale(d.HexY))
         .attr("width", itemWidth)

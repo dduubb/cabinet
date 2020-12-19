@@ -1,0 +1,22 @@
+// without padding added to padding
+ // CONFIGURE THE SIZE
+      if (resultWiderThanWindow) {
+        // bounded by width
+        radius = (config.width / (xSpan + 1)) * 2    -(10)              //width devided by num columns
+        itemHeight = radius * hexRatio  ////
+        yTop = itemHeight * (ySpan - (ySpan / 4))  +  (.75 * ySpan * 10)  //works
+        xLeft = config.width - (radius / 2)   +5            //account for half hex
+        autoHeight = ((.75 * ySpan + 1) * itemHeight) +  (.75 * ySpan * 10)           //
+        topPadding = (config.height - autoHeight) / 2
+        itemWidth = radius
+      } else {
+        console.log("bounded by height")
+        autoHeight = config.height
+        radius = (autoHeight / (((ySpan + 1 - (ySpan / 4))) * hexRatio))  -gap //ok //height devided by num rows
+        config.width = radius * ((xSpan + 1) / 2)  +((xSpan-1)*gap*(1/hexRatio) )             //right 
+        xLeft = config.width - radius / 2   + (gap)                         //right
+        yTop = autoHeight - (radius * hexRatio)
+        leftPadding = (window.innerWidth - config.width) / 2 - config.padding
+        itemWidth = radius
+        itemHeight = radius * hexRatio
+      }
