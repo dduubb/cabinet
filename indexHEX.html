@@ -10,9 +10,6 @@
 <body id="page" style="overflow:hidden; margin: 0;position: absolute">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/5.7.0/d3.min.js"></script>
   <style>
-    g#g1  {
-      /* transform: scale(1.5, 1.5) translate(-2px, -105px); */ */
-    }
   div.tooltip {	
     position: absolute;
     overflow-wrap: break-word;	
@@ -30,17 +27,36 @@
   /// done with hex fix
   //// to do add gap height working hex on the edge ? do I want to include gap in margin
   //// to do add gap width
+  //// add 2 gaps
     let urlLocale = new URL(window.location.href)
 
     const hexRatio = (1 / ((Math.sqrt(3) / 2))) //  1.1547005
     var axisScale = {
       padding: parseFloat(urlLocale.searchParams.get("p")),
       gap: parseFloat(urlLocale.searchParams.get("g")),
+      xGap: parseFloat(urlLocale.searchParams.get("xg")),
+      yGap: parseFloat(urlLocale.searchParams.get("yg")),
       url: (urlLocale.searchParams.get("url")),
       tooltip: (urlLocale.searchParams.get("tooltip")),
+      clippath:(urlLocale.searchParams.get("clip"))
     }
 
+    let clippaths = {
+      'round': "circle(44%)",
+      'hex':"polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)",
+      'slant2':"polygon(20% 7.57%, 100% 7.57%, 80% 92.43%, 0% 92.43%, 20% 7.57%)",
+      'slant3':"polygon(33% 7.57%, 100% 7.57%, 67% 92.43%, 0% 92.43%, 33% 7.57%)",
+      'slant4':"polygon(25% 7.57%, 100% 7.57%, 75% 92.43%, 0% 92.43%, 25% 7.57%)",
+      'square':"polygon(0% 7.57%, 100% 7.57%, 100% 92.43%, 0% 92.43%, 0% 7.57%)",
+      'none':"none"
+    }
+
+    let activeClippath = (axisScale.clippath?clippaths[axisScale.clippath]:clippaths["hex"])
+
     let urls = {
+      'slant':"https://docs.google.com/spreadsheets/d/e/2PACX-1vRWQ6Tu7bFvRZnXRAReUb_SyBjclucR5of-jG9KCx9gN-NNmQdIKvb24i1he5oFS182XV_hSRU-bsut/pub?gid=1833859145&single=true&output=csv",
+      'senate': "https://docs.google.com/spreadsheets/d/e/2PACX-1vRWQ6Tu7bFvRZnXRAReUb_SyBjclucR5of-jG9KCx9gN-NNmQdIKvb24i1he5oFS182XV_hSRU-bsut/pub?gid=1547591448&single=true&output=csv",
+      '100': "https://docs.google.com/spreadsheets/d/e/2PACX-1vRWQ6Tu7bFvRZnXRAReUb_SyBjclucR5of-jG9KCx9gN-NNmQdIKvb24i1he5oFS182XV_hSRU-bsut/pub?gid=341973051&single=true&output=csv",
       'rows': "https://docs.google.com/spreadsheets/d/e/2PACX-1vRWQ6Tu7bFvRZnXRAReUb_SyBjclucR5of-jG9KCx9gN-NNmQdIKvb24i1he5oFS182XV_hSRU-bsut/pub?gid=209003716&single=true&output=csv",
       'random' : 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRWQ6Tu7bFvRZnXRAReUb_SyBjclucR5of-jG9KCx9gN-NNmQdIKvb24i1he5oFS182XV_hSRU-bsut/pub?gid=1840771184&single=true&output=csv',
       'doggy' : "https://docs.google.com/spreadsheets/d/e/2PACX-1vT8O3Mk62YHM5jY3WF_5Bfc_L-_lWkbDINATSzr3uvF8WehERLMSshRNw32GB-9e-lM72EB0HeiWsiM/pub?gid=736849411&single=true&output=csv",
@@ -65,36 +81,41 @@
       }
       let xSpan = (config.tableauXscaleRight - config.tableauXscaleLeft)
       let ySpan = (config.tableauYscaleTop - config.tableauYscaleBottom)
-      let gap = (axisScale.gap ? axisScale.gap : 5)
+      
+      let xGap = (axisScale.xGap ? axisScale.xGap : 5)
+      let yGap = (axisScale.yGap ? axisScale.yGap : 5)
+
+      if (axisScale.gap) {
+        xGap = yGap = axisScale.gap 
+      } 
       let autoHeight, yTop, yBottom, xRight, xLeft, topPadding = 0,
         radius,
         leftPadding = 0
-      let yGap = radius * hexRatio
       let resultWiderThanWindow = (((xSpan + 1) / 2) / ((ySpan) * hexRatio) > (config.width / config.height));
       console.log(resultWiderThanWindow);
 
       // CONFIGURE THE SIZE
       if (resultWiderThanWindow) {
         // bounded by width
-        radius = (config.width / (xSpan + 1)) * 2    -(gap)              //width devided by num columns
+        radius = (config.width / (xSpan + 1)) * 2    -(xGap)              //width devided by num columns
         itemHeight = radius * hexRatio  ////
         xRight = 0
-        yTop = itemHeight * (ySpan - (ySpan / 4))  +  (.75 * ySpan * gap)  //works
+        yTop = itemHeight * (ySpan - (ySpan / 4))  +  (.75 * ySpan * yGap)  //works
         xLeft = config.width - (radius / 2)              //account for half hex
-        autoHeight = ((.75 * ySpan + 1) * itemHeight) +  (.75 * ySpan * gap)           //
-        yBottom = gap
-        xRight = gap/2
+        autoHeight = ((.75 * ySpan + 1) * itemHeight) +  (.75 * ySpan * yGap)           //
+        yBottom = yGap
+        xRight = xGap/2
         topPadding = (config.height - autoHeight) / 2
         itemWidth = radius
       } else {
         console.log("bounded by height")
         autoHeight = config.height
-        radius = (autoHeight / (((ySpan + 1 - (ySpan / 4))) * hexRatio))  -gap //ok //height devided by num rows
-        config.width = radius * ((xSpan + 1) / 2)  +((xSpan)*gap*(1/hexRatio) )             //right 
+        radius = (autoHeight / (((ySpan + 1 - (ySpan / 4))) * hexRatio))  -yGap //ok //height devided by num rows
+        config.width = radius * ((xSpan + 1) / 2)  +((xSpan)*xGap*(1/hexRatio) )             //right 
         xLeft = config.width - radius / 2                           //right
-        yTop = autoHeight - (radius * hexRatio) - (gap)
-        xRight = gap
-        yBottom = gap
+        yTop = autoHeight - (radius * hexRatio) - (yGap)
+        xRight = xGap
+        yBottom = yGap
         leftPadding = (window.innerWidth - config.width) / 2 - config.padding
         itemWidth = radius
         itemHeight = radius * hexRatio
@@ -116,10 +137,10 @@
         .attr("xmlns", "http://www.w3.org/2000/svg")
 
       let xScale = d3.scaleLinear()
-        .domain([config.tableauXscaleLeft, config.tableauXscaleRight])
-        .range([xRight, xLeft])
+        .domain([config.tableauXscaleLeft  , config.tableauXscaleRight ])
+        .range([xRight  , xLeft ]) //here
       let yScale = d3.scaleLinear()
-        .domain([config.tableauYscaleBottom, config.tableauYscaleTop])
+        .domain([config.tableauYscaleBottom , config.tableauYscaleTop])
         .range([yTop, yBottom])
 
         // Define the div for the tooltip
@@ -134,23 +155,24 @@ var div = d3.select("body").append("div")
         .data(data)
         .enter()
         .append('g')
-        .attr("clip-path", "polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)")
+        //.attr("clip-path", "polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)")
+      .attr("clip-path", activeClippath)
       
          .attr("id", d => ("g"+d.index))
 
 
       groups.append("rect").attr("fill", "#000000cc")
         
-        .attr("x", d => xScale(d.HexX))
-        .attr("y", d => yScale(d.HexY))
+        .attr("x", d => xScale(d.HexX) - (((d.forceScale-1) * (itemWidth/2))))
+        .attr("y", d => yScale(d.HexY) - ((  (d.forceScale-1) * (itemHeight/2))))
         .attr("width", d => (d.forceScale * itemWidth))
         .attr("height", d => (d.forceScale * itemHeight))
 
 
       groups.append('image')
         .attr('href', d => d.img)
-        .attr('x', d => xScale(d.HexX))
-        .attr('y', d => yScale(d.HexY))
+        .attr('x', d => xScale(d.HexX) - (((d.forceScale-1) * (itemWidth/2))))
+        .attr('y', d => yScale(d.HexY) - ((  (d.forceScale-1) * (itemHeight/2))))
         .attr("width", d => (d.forceScale * itemWidth))
         .attr("height", d => (d.forceScale * itemHeight))
 
@@ -166,7 +188,7 @@ var div = d3.select("body").append("div")
                 .style("top",  ((d3.select(this).attr("y")*1)+(d3.select(this).attr("height")*0.75))  + "px")
                 .style("width",  ((d3.select(this).attr("width"))-8)  + "px")
                 .style("min-height",  ((d3.select(this).attr("height")*0.25))  + "px")
-                console.log((gap));	
+
             }})					
         .on("mouseout", function(d) {		
             div.transition()		
