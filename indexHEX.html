@@ -24,14 +24,10 @@
   <script type="text/javascript">
 
   
-  /// done with hex fix
-  //// to do add gap height working hex on the edge ? do I want to include gap in margin
-  //// to do add gap width
-  //// add 2 gaps
-    let urlLocale = new URL(window.location.href)
+     let urlLocale = new URL(window.location.href)
 
     const hexRatio = (1 / ((Math.sqrt(3) / 2))) //  1.1547005
-    var axisScale = {
+    let axisScale = {
       padding: parseFloat(urlLocale.searchParams.get("p")),
       gap: parseFloat(urlLocale.searchParams.get("g")),
       xGap: parseFloat(urlLocale.searchParams.get("xg")),
