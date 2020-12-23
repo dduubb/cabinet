@@ -16,8 +16,6 @@
   </style>
 
   <script type="text/javascript">
-    var hexbin = d3.hexbin();
-
 
     d3.csv(
       "https://docs.google.com/spreadsheets/d/e/2PACX-1vT8O3Mk62YHM5jY3WF_5Bfc_L-_lWkbDINATSzr3uvF8WehERLMSshRNw32GB-9e-lM72EB0HeiWsiM/pub?gid=412777815&single=true&output=csv"
@@ -26,10 +24,10 @@
         "width": window.innerWidth,
         "height": window.innerHeight,
         "padding": 0,
-        "maxRadiuc": 28,
+        "maxRadius": 28,
         "tableauXscale": 18,
         "tableauYscaleTop": 15.8,
-        "tableauYscaleDottom": -15.8
+        "tableauYscaleBottom": -15.8
       }
 
 
@@ -43,21 +41,21 @@
 
       let xScale = d3.scaleLinear()
         .domain([-config.tableauXscale, config.tableauXscale])
-        .range([config.padding - config.maxRadiuc, config.width - config.padding - config.maxRadiuc]);
+        .range([config.padding - config.maxRadius, config.width - config.padding - config.maxRadius]);
       let yScale = d3.scaleLinear()
-        .domain([config.tableauYscaleTop, config.tableauYscaleDottom])
+        .domain([config.tableauYscaleTop, config.tableauYscaleBottom])
         .range([config.padding, config.height - config.padding]);
 
       // AUTO HEIGHT WIDTH
       // let xScale = d3.scaleLinear()         
       //             .domain([d3.min(data, d => d.X), -d3.min(data, d => d.X)]) 
-      //             .range([config.padding-config.maxRadiuc,config.width-config.padding-config.maxRadiuc]);
+      //             .range([config.padding-config.maxRadius,config.width-config.padding-config.maxRadius]);
       // let yScale = d3.scaleLinear()  
       //             .domain([d3.max(data, d => d.Y), -d3.max(data, d => d.Y)]) 
       //             .range([config.padding,config.height-config.padding]);
       let rScale = d3.scaleLinear()
         .domain([-d3.max(data, d => d.Radius), d3.max(data, d => d.Radius)])
-        .range([10, config.maxRadiuc]);
+        .range([10, config.maxRadius]);
 
 
       data.forEach((d, i) => {
