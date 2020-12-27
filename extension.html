@@ -37,6 +37,8 @@
                                 [obj.getFieldName()]: o[index].formattedValue
                             }
                         })
+                        tgt.innerHTML = "<h4>UnderlyingTableData:</h4><p>" + JSON.stringify(dataTable.getData()) + "</p>";
+            
                         return row
                     });
                     console.log(jsonResults);
