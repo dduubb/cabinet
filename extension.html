@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>getData() Basic Table Example</title>
+    <script type="text/javascript" src="https://public.tableau.com/javascripts/api/tableau-2.5.0.min.js"></script>
+    <script type="text/javascript">
+        let viz, sheet, table;
+
+        function initViz() {
+            let containerDiv = document.getElementById("vizContainer"),
+                url = "https://public.tableau.com/views/HistogramPictures/Dashboard1",
+                //url = "https://public.tableau.com/views/Biden-HarrisTransition/WithCovidTeam",
+                options = {
+                    hideTabs: true,
+                    hideToolbar: false,
+                    onFirstInteractive: function () {
+                        document.getElementById('getData').disabled = false; // Enable our button
+                    }
+                };
+            viz = new tableau.Viz(containerDiv, url, options);
+        }
+
+        function getUnderlyingData() {
+            //sheet = viz.getWorkbook().getActiveSheet().getWorksheets().get("covid_targets");
+            sheet = viz.getWorkbook().getActiveSheet().getWorksheets().get("Sheet 1");
+            // viz.getWorkbook().getActiveSheet("Sheet 1");//for single sheet
+            options = {maxRows: 0, ignoreAliases: true, ignoreSelection: true, includeAllColumns: false};
+            sheet.getUnderlyingTablesAsync().then(tables => {
+                return sheet.getUnderlyingTableDataAsync(tables[0].getTableId(), options).then(dataTable => {
+                    let tgt = document.getElementById("dataTarget");
+                    let header = dataTable.getColumns(),
+                        data = dataTable.getData(),
+                        jsonResults = data.map((o, i) => {
+                        let row = header.map((obj, index) => {
+                            return {
+                                [obj.getFieldName()]: o[index].formattedValue
+                            }
+                        })
+                        return row
+                    });
+                    console.log(jsonResults);
+                    let csv = [(header.map(obj => obj.getFieldName())), data.map(obj => obj.map(o => o
+                        .formattedValue).join(",")).join("\n")].join("\n");
+                    console.log(csv)
+                    // document.getElementById('downloadData').disabled = false;
+                    // let link = document.createElement("a");
+                    // link.href = 'data:text/csv,' + encodeURIComponent(csv);
+                    // link.download = "Example.csv";
+                    // link.click();
+                });
+            });
+        }
+    </script>
+</head>
+
+<body onload="initViz();">
+    <div class="page-header">
+        <button id="getData" onclick="getUnderlyingData()" class="btn" disabled>Get Data</button>
+    </div>
+    <div id="dataTarget"></div>
+    <div id="vizContainer" style="width:1px; height:1px;"></div>
+
+</body>
+
+</html>
