@@ -36,8 +36,13 @@
       yGap: parseFloat(urlLocale.searchParams.get("yg")),
       url: (urlLocale.searchParams.get("url")),
       tooltip: (urlLocale.searchParams.get("tooltip")),
-      clippath:(urlLocale.searchParams.get("clip"))
+      clippath:(urlLocale.searchParams.get("clip")),
+      xUnit: (urlLocale.searchParams.get("xUnit")),
+      yUnit: (urlLocale.searchParams.get("yUnit"))
     }
+
+    let GridX = (axisScale.xUnit? axisScale.xUnit : "HexX"),
+      GridY = (axisScale.yUnit? axisScale.yUnit : "HexY");
 
     let clippaths = {
       'round': "circle(44%)",
@@ -74,10 +79,10 @@
         "height": window.innerHeight - (axisScale.padding ? axisScale.padding * 2 : 0),
         "padding": (axisScale.padding ? axisScale.padding : 0),
         "maxRadius": 0,
-        "tableauXscaleLeft": d3.min(data, d => parseFloat(d.HexX)),
-        "tableauXscaleRight": d3.max(data, d => parseFloat(d.HexX) + 1),
-        "tableauYscaleTop": d3.max(data, d => parseFloat(d.HexY)),
-        "tableauYscaleBottom": d3.min(data, d => parseFloat(d.HexY)),
+        "tableauXscaleLeft": d3.min(data, d => parseFloat(d[GridX])),
+        "tableauXscaleRight": d3.max(data, d => parseFloat(d[GridX]) + 1),
+        "tableauYscaleTop": d3.max(data, d => parseFloat(d[GridY])),
+        "tableauYscaleBottom": d3.min(data, d => parseFloat(d[GridY])),
         "tableauPadding": 1
       }
       let xSpan = (config.tableauXscaleRight - config.tableauXscaleLeft)
@@ -164,16 +169,16 @@ var div = d3.select("body").append("div")
 
       groups.append("rect").attr("fill", "#000000cc")
         
-        .attr("x", d => xScale(d.HexX) - (((d.forceScale-1) * (itemWidth/2))))
-        .attr("y", d => yScale(d.HexY) - ((  (d.forceScale-1) * (itemHeight/2))))
+        .attr("x", d => xScale(d[GridX]) - (((d.forceScale-1) * (itemWidth/2))))
+        .attr("y", d => yScale(d[GridY]) - ((  (d.forceScale-1) * (itemHeight/2))))
         .attr("width", d => (d.forceScale * itemWidth))
         .attr("height", d => (d.forceScale * itemHeight))
 
 
       groups.append('image')
         .attr('href', d => d.img)
-        .attr('x', d => xScale(d.HexX) - (((d.forceScale-1) * (itemWidth/2))))
-        .attr('y', d => yScale(d.HexY) - ((  (d.forceScale-1) * (itemHeight/2))))
+        .attr('x', d => xScale(d[GridX]) - (((d.forceScale-1) * (itemWidth/2))))
+        .attr('y', d => yScale(d[GridY]) - ((  (d.forceScale-1) * (itemHeight/2))))
         .attr("width", d => (d.forceScale * itemWidth))
         .attr("height", d => (d.forceScale * itemHeight))
 
