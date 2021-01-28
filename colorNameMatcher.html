@@ -1,0 +1,61 @@
+<html>
+    <head></head>
+<body>
+<div id="value"></div>
+</body>
+  <script type="text/javascript" src="ntc.js"></script>
+
+  <script type="text/javascript">
+let urlLocale = new URL(window.location.href)
+let color = urlLocale.searchParams.get("color")
+
+let colors = ["FFFFFF",
+"D8DFFC",
+"FDEFD4",
+"FFD2CC",
+"E2D4F7",
+"F5F6FF",
+"B0C0FB",
+"F9E0A7",
+"FFA799",
+"C3A8ED",
+"E9EAFE",
+"89A1F9",
+"F6D179",
+"FF7D67",
+"A77DE3",
+"D9DCFD",
+"6281F6",
+"F4C14E",
+"FF5033",
+"8A52DB",
+"84718D",
+"4961B8",
+"C29142",
+"CA3C2E",
+"733FAD",
+"2D051F",
+"31417B",
+"926337",
+"972B29",
+"5C2D7D",
+"000000",
+"19203E",
+"5F342B",
+"611724",
+"44174E"
+];
+colors.forEach(color => {
+
+    var n_match  = ntc.name(color);
+    n_rgb        = n_match[0]; // This is the RGB value of the closest matching color
+    n_name       = n_match[1]; // This is the text string for the name of the match   n_exactmatch = n_match[2]; // True if exact color match, False if close-match
+     //alert(n_match);
+
+    document.getElementById("value").innerHTML += color+","+n_match+"<br>";
+        
+});
+</script>
+
+
+</html>

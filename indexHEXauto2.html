@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <title>Hex Diagram Background </title>
+  <meta name="author" content="dale wunderlich">
+</head>
+
+<body id="page" style="overflow:hidden; margin: 0;position: absolute">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.5.0-beta4/html2canvas.js" integrity="sha512-5XAS7mhslf6oGjLxzmY4iYfFwDGf8G1ZBeWdymR/+y8ZCvPWwI3Ff+WrS+kabqYdIEwYaLEnJhsuymZxgrneQg==" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/5.7.0/d3.min.js"></script>
+  <style>
+    svg html body {
+      fill: none;
+    }
+
+    div.tooltip {
+      position: absolute;
+      overflow-wrap: break-word;
+      text-align: left;
+      width: 150px;
+      padding: 4px;
+      font: 16px sans-serif;
+      background: rgb(212, 212, 212);
+      border: 0px;
+      pointer-events: none;
+    }
+  </style>
+  <script type="text/javascript">
+    let urlLocale = new URL(window.location.href)
+
+    const hexRatio = (1 / ((Math.sqrt(3) / 2))) //  1.1547005
+    let axisScale = {
+      padding: parseFloat(urlLocale.searchParams.get("p")),
+      topPadding: parseFloat(urlLocale.searchParams.get("tp")),
+      gap: parseFloat(urlLocale.searchParams.get("g")),
+      xGap: parseFloat(urlLocale.searchParams.get("xg")),
+      yGap: parseFloat(urlLocale.searchParams.get("yg")),
+      url: (urlLocale.searchParams.get("url")),
+      tooltip: (urlLocale.searchParams.get("tooltip")),
+      clippath: (urlLocale.searchParams.get("clip")),
+      xUnit: (urlLocale.searchParams.get("xUnit")),
+      yUnit: (urlLocale.searchParams.get("yUnit"))
+    }
+
+    let GridX = (axisScale.xUnit ? axisScale.xUnit : "HexX"),
+      GridY = (axisScale.yUnit ? axisScale.yUnit : "HexY");
+
+    let clippaths = {
+      'round': "circle(44%)",
+      'hex': "polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)",
+      'slant2': "polygon(20% 7.57%, 100% 7.57%, 80% 92.43%, 0% 92.43%, 20% 7.57%)",
+      'slant3': "polygon(33% 7.57%, 100% 7.57%, 67% 92.43%, 0% 92.43%, 33% 7.57%)",
+      'slant4': "polygon(25% 7.57%, 100% 7.57%, 75% 92.43%, 0% 92.43%, 25% 7.57%)",
+      'square': "polygon(0% 7.57%, 100% 7.57%, 100% 92.43%, 0% 92.43%, 0% 7.57%)",
+      'none': "none"
+    }
+
+    let activeClippath = (axisScale.clippath ? clippaths[axisScale.clippath] : clippaths["hex"])
+
+    let urls = {
+      'forExport_alt': "https://docs.google.com/spreadsheets/d/e/2PACX-1vSjKXRd5JsZdNv_D31zJT_ZuUtAfIJFf3ky52m3B2IoFlSZ1gFwYkyMZLf-FC9cWE4Yzr9thQumuPXl/pub?gid=606355498&single=true&output=csv",
+      'forExport': "https://docs.google.com/spreadsheets/d/e/2PACX-1vSjKXRd5JsZdNv_D31zJT_ZuUtAfIJFf3ky52m3B2IoFlSZ1gFwYkyMZLf-FC9cWE4Yzr9thQumuPXl/pub?gid=1309822741&single=true&output=csv",
+      "age": "https://docs.google.com/spreadsheets/d/e/2PACX-1vRWQ6Tu7bFvRZnXRAReUb_SyBjclucR5of-jG9KCx9gN-NNmQdIKvb24i1he5oFS182XV_hSRU-bsut/pub?gid=1025978820&single=true&output=csv",
+      "c19rows": "https://docs.google.com/spreadsheets/d/e/2PACX-1vRWQ6Tu7bFvRZnXRAReUb_SyBjclucR5of-jG9KCx9gN-NNmQdIKvb24i1he5oFS182XV_hSRU-bsut/pub?gid=680939587&single=true&output=csv",
+      'slant': "https://docs.google.com/spreadsheets/d/e/2PACX-1vRWQ6Tu7bFvRZnXRAReUb_SyBjclucR5of-jG9KCx9gN-NNmQdIKvb24i1he5oFS182XV_hSRU-bsut/pub?gid=1833859145&single=true&output=csv",
+      'senate': "https://docs.google.com/spreadsheets/d/e/2PACX-1vRWQ6Tu7bFvRZnXRAReUb_SyBjclucR5of-jG9KCx9gN-NNmQdIKvb24i1he5oFS182XV_hSRU-bsut/pub?gid=1547591448&single=true&output=csv",
+      '100': "https://docs.google.com/spreadsheets/d/e/2PACX-1vRWQ6Tu7bFvRZnXRAReUb_SyBjclucR5of-jG9KCx9gN-NNmQdIKvb24i1he5oFS182XV_hSRU-bsut/pub?gid=341973051&single=true&output=csv",
+      'rows': "https://docs.google.com/spreadsheets/d/e/2PACX-1vRWQ6Tu7bFvRZnXRAReUb_SyBjclucR5of-jG9KCx9gN-NNmQdIKvb24i1he5oFS182XV_hSRU-bsut/pub?gid=209003716&single=true&output=csv",
+      'random': 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRWQ6Tu7bFvRZnXRAReUb_SyBjclucR5of-jG9KCx9gN-NNmQdIKvb24i1he5oFS182XV_hSRU-bsut/pub?gid=1840771184&single=true&output=csv',
+      'doggy': "https://docs.google.com/spreadsheets/d/e/2PACX-1vT8O3Mk62YHM5jY3WF_5Bfc_L-_lWkbDINATSzr3uvF8WehERLMSshRNw32GB-9e-lM72EB0HeiWsiM/pub?gid=736849411&single=true&output=csv",
+      'narrow': "https://docs.google.com/spreadsheets/d/e/2PACX-1vT8O3Mk62YHM5jY3WF_5Bfc_L-_lWkbDINATSzr3uvF8WehERLMSshRNw32GB-9e-lM72EB0HeiWsiM/pub?gid=412777815&single=true&output=csv",
+      'wide': "https://docs.google.com/spreadsheets/d/e/2PACX-1vRWQ6Tu7bFvRZnXRAReUb_SyBjclucR5of-jG9KCx9gN-NNmQdIKvb24i1he5oFS182XV_hSRU-bsut/pub?gid=0&single=true&output=csv",
+      'whole': "https://docs.google.com/spreadsheets/d/e/2PACX-1vT8O3Mk62YHM5jY3WF_5Bfc_L-_lWkbDINATSzr3uvF8WehERLMSshRNw32GB-9e-lM72EB0HeiWsiM/pub?gid=694371247&single=true&output=csv"
+    }
+
+    d3.csv(
+      (urls[axisScale.url] ? urls[axisScale.url] : urls.wide)
+    ).then((data) => {
+      const pads = 64
+      const topPads = -2
+      let config = {
+        "width": window.innerWidth - (axisScale.padding ? axisScale.padding * 2 : pads * 2),
+        "height": window.innerHeight - (axisScale.padding ? axisScale.padding * 2 : pads * 2),
+        "padding": (axisScale.padding ? axisScale.padding : pads),
+        "maxRadius": 0,
+        "tableauXscaleLeft": d3.min(data, d => parseFloat(d[GridX])),
+        "tableauXscaleRight": d3.max(data, d => parseFloat(d[GridX]) + 1),
+        "tableauYscaleTop": d3.max(data, d => parseFloat(d[GridY])),
+        "tableauYscaleBottom": d3.min(data, d => parseFloat(d[GridY])),
+        "tableauPadding": 1
+      }
+      let xSpan = (config.tableauXscaleRight - config.tableauXscaleLeft) // the width in terms of data
+      let ySpan = (config.tableauYscaleTop - config.tableauYscaleBottom) // the height in terms of data
+
+      let xGap = (axisScale.xGap ? axisScale.xGap : 0)
+      let yGap = (axisScale.yGap ? axisScale.yGap : 0)
+
+      if (axisScale.gap) {
+        xGap = yGap = axisScale.gap
+      }
+      let autoHeight, yTop, yBottom, xRight, xLeft,
+        topPadding = (axisScale.topPadding ? axisScale.topPadding : topPads),
+        radius,
+        leftPadding = 0
+      let resultWiderThanWindow = (((xSpan + 1) / 2) / ((ySpan) * hexRatio) > (config.width / config.height));;
+      console.log(resultWiderThanWindow);
+
+      let circleRatioTweak = (axisScale.clippath === "round" ? ((hexRatio - 1) * (.25)) : 0)
+
+      // CONFIGURE THE SIZE
+      autoHeight = config.height
+      radius = (resultWiderThanWindow ? (config.width / (xSpan + 1)) * 2 - (xGap) : (autoHeight / (((ySpan + 1 - (
+        ySpan / 4))) * hexRatio)) - yGap)
+
+      config.width = config.width + (config.width / (xSpan)) - (radius / 2) //-(config.padding)             //right 
+      xLeft = config.width - radius / 2 //right
+      yTop = (autoHeight - (radius * hexRatio)) + circleRatioTweak * radius - 2 * topPadding
+
+      xRight = 0
+      yBottom = -circleRatioTweak * radius //  
+      itemWidth = radius
+      itemHeight = radius * hexRatio
+
+      document.getElementById("page").style.top = `${config.padding + topPadding}px`
+      document.getElementById("page").style.left = `${config.padding + leftPadding}px`
+
+      let body = d3.select("body");
+
+      let svg = body.append("svg")
+        .style('background-color', 'none')
+        .attr("id", "svgItem")
+        .attr("width", config.width)
+        .attr("height", autoHeight)
+        .attr("xmlns", "http://www.w3.org/2000/svg")
+
+      let xScale = d3.scaleLinear()
+        .domain([config.tableauXscaleLeft, config.tableauXscaleRight])
+        .range([xRight, xLeft]) //here
+      let yScale = d3.scaleLinear()
+        .domain([config.tableauYscaleBottom, config.tableauYscaleTop])
+        .range([yTop, yBottom])
+
+      // Define the div for the tooltip
+      let div = d3.select("body").append("div")
+        .attr("class", "tooltip")
+        .attr("id", "tooltip")
+        .style("opacity", 0);
+
+      let groups = d3.select('svg')
+        .selectAll('image')
+        .data(data)
+        .enter()
+        .append('g')
+        .attr("id", (d, i) => ("g" + i))
+
+      groups.append('image')
+        .attr('href', d => d.img)
+        .attr('x', d => xScale(d[GridX]) - (((d.forceScale - 1) * (itemWidth / 2))))
+        .attr('y', d => yScale(d[GridY]) - (((d.forceScale - 1) * (itemHeight / 2))))
+        .attr("width", d => (d.forceScale * itemWidth))
+        .attr("height", d => (d.forceScale * itemHeight))
+        .attr("clip-path", activeClippath)
+
+        ///////////////Tool tip
+        .on("mouseover", function (d) {
+          if (axisScale.tooltip) {
+            div.transition()
+              .duration(200)
+              .style("opacity", .9);
+            div.html("<b>" + d.Name + "</b><br/>" + d.Position)
+              .style("left", d3.select(this).attr("x") + "px")
+              .style("top", ((d3.select(this).attr("y") * 1) + (d3.select(this).attr("height") * 0.75)) + "px")
+              .style("width", ((d3.select(this).attr("width")) - 8) + "px")
+              .style("min-height", ((d3.select(this).attr("height") * 0.25)) + "px")
+          }
+        })
+
+        .on("mouseout", function (d) {
+          div.transition()
+            .duration(500)
+            .style("opacity", 0);
+        });
+
+        setTimeout(() => {
+                html2canvas(document.querySelector("#page"),{useCORS:true}).then(canvas => {
+                    document.open()
+        document.appendChild(canvas)
+      });
+        }, 50000);
+
+
+
+    })
+  </script>
+
+
+
+</body>
+
+</html>
