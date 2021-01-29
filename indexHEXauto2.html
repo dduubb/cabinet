@@ -8,8 +8,8 @@
 </head>
 
 <body id="page" style="overflow:hidden; margin: 0;position: absolute">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.5.0-beta4/html2canvas.js" integrity="sha512-5XAS7mhslf6oGjLxzmY4iYfFwDGf8G1ZBeWdymR/+y8ZCvPWwI3Ff+WrS+kabqYdIEwYaLEnJhsuymZxgrneQg==" crossorigin="anonymous"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/5.7.0/d3.min.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/5.7.0/d3.min.js"></script>
   <style>
     svg html body {
       fill: none;
@@ -183,20 +183,65 @@
             .style("opacity", 0);
         });
 
-        setTimeout(() => {
-                html2canvas(document.querySelector("#page"),{useCORS:false}).then(canvas => {
-                    document.open()
-        document.appendChild(canvas)
-      });
-        }, 50000);
+
+let getImageData = (dat)=>{console.log(dat)
+    let svgElement = dat;
+    let {width, height} = svgElement.getBBox();
+    console.log(width, height);
+    let clonedSvgElement = svgElement.cloneNode(true);
+    let outerHTML = clonedSvgElement.outerHTML,
+    blob = new Blob([outerHTML],{type:'image/svg+xml;charset=utf-8'});
+    console.log(blob);
+    let URL = window.URL || window.webkitURL || window;
+    
+    let blobURL = URL.createObjectURL(blob);
+console.log(blobURL);
+let image = new Image();
+image.onload = () => {
+  
+   let canvas = document.createElement('canvas');
+   
+   canvas.width = width;
+   
+   canvas.height = height;
+   let context = canvas.getContext('2d');
+   // draw image in canvas starting left-0 , top - 0  
+   context.drawImage(image, 0, 0, width, height );
+  //  downloadImage(canvas); need to implement
+  let png = canvas.toDataURL(); // default png
+  var download = function(href, name){
+  var link = document.createElement('a');
+  link.download = name;
+  link.style.opacity = "0";
+  document.body.append(link);
+  link.href = href;
+  link.click();
+  link.remove();
+  //window.open()
+}
+download(png, "image.png");
 
 
 
-    })
+
+
+};
+image.src = blobURL;
+    
+
+
+}
+
+setTimeout(() => {
+    console.log(document.getElementById("page"));
+    getImageData(document.getElementById("svgItem"))
+}, 50000);
+
+
+
+
+
+});
   </script>
-
-
-
 </body>
-
 </html>
