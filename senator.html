@@ -9,9 +9,9 @@
 </head>
 <body>
   <main id="app" class="grid place-items-center h-screen bg-gray-100">
-    <section class="flex flex-col md:flex-row gap-11 py-10 px-5 bg-white rounded-md shadow-lg w-3/4 md:max-w-2xl">
-      <div class="text-indigo-500 flex flex-col justify-between">
-        <img :src="getImgUrl(bioid)" v-bind:alt="pic">
+    <section class="flex flex-col md:flex-row gap-11 py-5 px-5 bg-white rounded-md shadow-lg w-11/12 md:max-w-2xl">
+      <div class="text-indigo-300 flex flex-col justify-between">
+        <img class="object-contain h-48 w-full" :src="getImgUrl(bioid)" v-bind:alt="pic">
        {{source}}
       </div>
       <div class="text-indigo-500">
