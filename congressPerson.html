@@ -15,12 +15,12 @@
 
     <section v-if=bioid class="flex flex-col bg-white rounded-md shadow-lg">
       <div class="text-indigo-300 flex flex-col justify-between">
-        <img class="object-contain h-48 w-full" :src="getImgUrl(bioid)" v-bind:alt="pic">
+        <img class="object-contain h-48 w-full" :src="getImgUrl(bioid.split(';')[0])" v-bind:alt="pic">
        {{source}}
       </div>
       <div class="text-indigo-500 flex justify-between">
         <small class="uppercase">{{title}}</small>
-        <h3 class="uppercase text-black text-2xl font-medium">{{name}}</h3>
+        <h3 class="uppercase text-black text-2xl font-medium">{{bioid.split(';')[1]}}</h3>
         <small class="text-black">{{blocktext}}</small>
 
       </div>
