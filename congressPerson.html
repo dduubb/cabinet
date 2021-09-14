@@ -8,12 +8,12 @@
     <script src="https://unpkg.com/vue@3.0.2"></script>
 </head>
 <body> 
-  <main id="app" class="grid place-items-center h-screen bg-gray-100" style="overflow: hidden;">
-    <section v-if=!bioid class="flex flex-col md:flex-row gap-11 py-5 px-5 bg-white rounded-md shadow-lg w-11/12 md:max-w-2xl">
+  <main id="app" class="grid place-items-center h-screen" style="overflow: hidden;">
+    <section v-if=!bioid class="flex flex-col md:flex-row gap-11 bg-white rounded-md shadow-lg w-11/12 md:max-w-2xl">
         Hover over a state or bar to view a senator's image from Congress.gov
     </section>
 
-    <section v-if=bioid class="flex flex-col md:flex-row gap-11 py-5 px-5 bg-white rounded-md shadow-lg w-11/12 md:max-w-2xl">
+    <section v-if=bioid class="flex flex-col bg-white rounded-md shadow-lg">
       <div class="text-indigo-300 flex flex-col justify-between">
         <img class="object-contain h-48 w-full" :src="getImgUrl(bioid)" v-bind:alt="pic">
        {{source}}
